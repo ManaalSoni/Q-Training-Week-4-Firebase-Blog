@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+        <title>Main</title>
+            
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    </head>
+<body class="h-100">
+    
+    <nav class="navbar navbar-expand-lg bg-dark text-white">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a class="navbar-brand" style="color:whitesmoke; text-decoration-style:wavy;" href="#">
+                        Blog App
+                    </a>
+                </li>
+
+                <li>
+                    <a class="nav-link" style="color:whitesmoke; text-decoration-style:wavy;" href="#">
+                        <span style="color: white;">Home</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a class="nav-link" style="color:whitesmoke; text-decoration-style:wavy;" href="#">
+                        <span style="color: white;">My Blogs</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="dropdown navbar-right">
+                <button id="option-id"
+                        class="btn btn-light dropdown-toggle bg-dark text-white"
+                        type="button"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        >
+                    Options
+                </button>
+
+                <div class="dropdown-menu"
+                aria-labelledby ="option-id">
+
+                <a class="dropdown-item" id="btn-logout" href="#">
+                    Logout
+                </a>
+            
+            </div>
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="row h-100 bg-light">
+        <div class="col-lg-0 bg-secondary">
+            <ul class="nav flex-column">
+
+            </ul>
+        </div>
+
+        <div class="col-lg-12">
+            <div class="container" id="container">
+                <!-- Blog post area -->
+                <div class="jumbotron bg-dark" style="margin-top:15px ;">
+                    <script> 
+                    var counter =0;
+                    </script>
+                    <div class="container text-center">
+                        <form action="" id="main-form">
+                            <div class="form-group">
+                                <textarea name="" id="main-desc" cols="30" rows="10" type="text" class="form-control" placeholder="Write here"></textarea>
+                                <div class="invalid-feedback">
+                                    Please write description before posting
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <button id="save-blog" type="button" style="width: 150px; height: 60px;" class="btn btn-light bg-light text-dark">
+                                    Post
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="result"></div>
+
+                    </div>
+
+                </div>
+                <!-- Blog post area ends -->
+
+                <!-- After blog post area -->
+
+                <hr>
+                <br><br><br>
+                <div class="text-center bg-light text-dark">
+                    <h3>All New Blogs</h3>
+                </div>
+                <hr>
+                <br>
+
+                <div class="row container-fluid bg-3">
+                    <div class="col-sm-12" id="blogs">
+
+                    </div>
+
+                </div>
+                <br>
+                <!-- After blog post area ends -->
+
+                <!-- Validation and post blogs -->
+                <script>
+                    $("#save-blog").click(function()
+                    {
+                        $("#main-desc").removeClass("is-invalid");
+
+                        var desc = $("#main-desc").val();
+
+                        if(!desc){
+                            $("#main-desc").addClass("is-invalid");
+                            return;
+                        }
+
+                        // Upload and save to Firebase
+                        var databaseRef = firebase.database().ref().child('Blogs')
+                        databaseRef.once('value').then(function(snapshot)
+                        {
+                            var time = new Date(); 
+                            var user = firebase.auth().currentUser;
+                            var uEmail = user.email
+                            
+                            var blogData = {
+                                "desc" : desc,
+                                "time": time.toLocaleString('en-us',{hour:"numeric", minute:'numeric',hour12: true}),
+                                "date" : time.toLocaleString('en-us'),
+                                "userId" : user.uid,
+                                "uEmail" : user.email
+                            };
+
+                            var newPostRef = database().push()
+                            newPostRef.set(blogData,function(err)
+                            {
+                                if(err)
+                                {
+                                    $("#result").attr("class", "alert alert-danger");
+                                    $("#result").html(err.message);
+                                }
+                                else
+                                {
+                                    $("#result").attr("class", "alert alert-success");
+                                    $("#result").html("blog posted successfully");
+
+                                    window.open("","_self");
+                                }
+                            });
+                        });
+
+
+                        // Upload and save ends
+                    });
+
+                    function resetForm()
+                    {
+                        $("#main-form")[0].reset();
+                        
+                    }
+
+                    
+                </script>
+                <!-- Validation and post blogs end -->
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/index.js"></script>
+    <script>
+        firebase.auth().onAuthStateChanged(function(user){
+            if(!user){
+                window.location.href = "signin.html";
+            }
+        });
+    </script>
+</body>
+</html>
